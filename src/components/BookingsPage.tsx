@@ -163,7 +163,7 @@ THANK YOU                    HAPPY JOURNEY                      VISIT AGAIN
     URL.revokeObjectURL(url);
   };
 
-  const numberToWords = (num) => {
+  const numberToWords = (num: number): string => {
     const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
     const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
     const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
