@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -168,16 +167,25 @@ THANK YOU                    HAPPY JOURNEY                      VISIT AGAIN
     const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
     const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
     
-    const numInt = Math.floor(Number(num));
+    const numInt = Math.floor(num);
     
     if (numInt === 0) return 'Zero';
     if (numInt < 10) return ones[numInt];
     if (numInt < 20) return teens[numInt - 10];
-    if (numInt < 100) return tens[Math.floor(numInt / 10)] + (numInt % 10 !== 0 ? ' ' + ones[numInt % 10] : '');
-    if (numInt < 1000) return ones[Math.floor(numInt / 100)] + ' Hundred' + (numInt % 100 !== 0 ? ' ' + numberToWords(numInt % 100) : '');
-    if (numInt < 100000) return numberToWords(Math.floor(numInt / 1000)) + ' Thousand' + (numInt % 1000 !== 0 ? ' ' + numberToWords(numInt % 1000) : '');
+    if (numInt < 100) {
+      const remainder = numInt % 10;
+      return tens[Math.floor(numInt / 10)] + (remainder !== 0 ? ' ' + ones[remainder] : '');
+    }
+    if (numInt < 1000) {
+      const remainder = numInt % 100;
+      return ones[Math.floor(numInt / 100)] + ' Hundred' + (remainder !== 0 ? ' ' + numberToWords(remainder) : '');
+    }
+    if (numInt < 100000) {
+      const remainder = numInt % 1000;
+      return numberToWords(Math.floor(numInt / 1000)) + ' Thousand' + (remainder !== 0 ? ' ' + numberToWords(remainder) : '');
+    }
     
-    return String(numInt);
+    return numInt.toString();
   };
 
   const activeBookings = bookings.filter(b => b.status !== 'checked-out');
