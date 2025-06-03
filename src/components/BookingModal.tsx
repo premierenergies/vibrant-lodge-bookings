@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +57,7 @@ const BookingModal = ({ booking, onSave, onCheckOut, onClose }) => {
     const tariff = formData.roomType === 'AC' ? 1500 : 1000;
     const checkInDate = new Date(formData.checkInDateTime);
     const checkOutDate = new Date(formData.checkOutDateTime);
-    const hours = (checkOutDate - checkInDate) / (1000 * 60 * 60);
+    const hours = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60);
     const days = Math.ceil(hours / 24);
     const total = tariff * formData.numberOfRooms * Math.max(1, days);
     

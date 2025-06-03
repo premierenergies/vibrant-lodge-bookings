@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,8 +31,8 @@ const CalendarPage = () => {
         const checkOut = new Date(booking.checkOutDateTime);
         const targetDate = new Date(dateStr);
         return booking.status === 'checked-in' && 
-               targetDate >= checkIn.setHours(0,0,0,0) && 
-               targetDate <= checkOut.setHours(23,59,59,999);
+               targetDate.getTime() >= checkIn.setHours(0,0,0,0) && 
+               targetDate.getTime() <= checkOut.setHours(23,59,59,999);
       })
       .flatMap(booking => booking.roomNumbers);
   };

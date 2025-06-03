@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -61,19 +60,19 @@ const AnalyticsPage = () => {
 
   const filteredBookings = getFilteredBookings();
   
-  const totalRevenue = filteredBookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0);
+  const totalRevenue = filteredBookings.reduce((sum, booking) => sum + (Number(booking.totalAmount) || 0), 0);
   const totalBookings = filteredBookings.length;
   const averageStay = totalBookings > 0 ? 
     filteredBookings.reduce((sum, booking) => {
       const checkIn = new Date(booking.checkInDateTime);
       const checkOut = new Date(booking.checkOutDateTime);
-      return sum + ((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+      return sum + ((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
     }, 0) / totalBookings : 0;
 
   // Room Type Analytics
   const roomTypeData = filteredBookings.reduce((acc, booking) => {
     const type = booking.roomType || 'Unknown';
-    acc[type] = (acc[type] || 0) + booking.totalAmount;
+    acc[type] = (acc[type] || 0) + (Number(booking.totalAmount) || 0);
     return acc;
   }, {});
 
@@ -99,27 +98,27 @@ const AnalyticsPage = () => {
   const monthlySales = filteredBookings.reduce((acc, booking) => {
     if (!booking.checkOutDateTime) return acc;
     const month = new Date(booking.checkOutDateTime).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-    acc[month] = (acc[month] || 0) + booking.totalAmount;
+    acc[month] = (acc[month] || 0) + (Number(booking.totalAmount) || 0);
     return acc;
   }, {});
 
   const monthlyData = Object.entries(monthlySales).map(([month, revenue]) => ({
     month,
     revenue
-  })).sort((a, b) => new Date(a.month) - new Date(b.month));
+  })).sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
 
   // Daily Revenue (for current month)
   const dailyRevenue = filteredBookings.reduce((acc, booking) => {
     if (!booking.checkOutDateTime) return acc;
     const date = new Date(booking.checkOutDateTime).toLocaleDateString();
-    acc[date] = (acc[date] || 0) + booking.totalAmount;
+    acc[date] = (acc[date] || 0) + (Number(booking.totalAmount) || 0);
     return acc;
   }, {});
 
   const dailyData = Object.entries(dailyRevenue).map(([date, revenue]) => ({
     date,
     revenue
-  })).sort((a, b) => new Date(a.date) - new Date(b.date));
+  })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const COLORS = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#6B7280'];
 
