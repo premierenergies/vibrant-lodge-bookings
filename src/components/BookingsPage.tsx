@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -162,12 +163,12 @@ THANK YOU                    HAPPY JOURNEY                      VISIT AGAIN
     URL.revokeObjectURL(url);
   };
 
-  const numberToWords = (num: number): string => {
+  const numberToWords = (num) => {
     const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
     const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
     const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
     
-    const numInt = Math.floor(num);
+    const numInt = Math.floor(Number(num));
     
     if (numInt === 0) return 'Zero';
     if (numInt < 10) return ones[numInt];

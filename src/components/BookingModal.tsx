@@ -68,21 +68,29 @@ const BookingModal = ({ booking, onSave, onCheckOut, onClose }) => {
   }, [booking]);
 
   useEffect(() => {
-    const tariff = formData.roomType === 'AC' ? 1500 : 1000;
     const checkInDate = new Date(formData.checkInDateTime);
     const checkOutDate = new Date(formData.checkOutDateTime);
     const hours = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60);
     const days = Math.ceil(hours / 24);
-    const baseAmount = tariff * formData.numberOfRooms * Math.max(1, days);
+    const baseAmount = Number(formData.roomTariff) * formData.numberOfRooms * Math.max(1, days);
     const taxInfo = calculateTax(baseAmount);
     const total = baseAmount + taxInfo.totalTax;
     
     setFormData(prev => ({
       ...prev,
-      roomTariff: tariff,
       totalAmount: total
     }));
-  }, [formData.roomType, formData.numberOfRooms, formData.checkInDateTime, formData.checkOutDateTime]);
+  }, [formData.roomTariff, formData.numberOfRooms, formData.checkInDateTime, formData.checkOutDateTime]);
+
+  useEffect(() => {
+    if (!booking) {
+      const tariff = formData.roomType === 'AC' ? 1500 : 1000;
+      setFormData(prev => ({
+        ...prev,
+        roomTariff: tariff
+      }));
+    }
+  }, [formData.roomType, booking]);
 
   const generateBookingNumber = () => {
     const savedBookings = localStorage.getItem('hotelBookings');
@@ -322,11 +330,13 @@ only producing this receipt                        GUEST SIGN.
             </div>
             
             <div>
-              <Label>Room Tariff (24hrs)</Label>
+              <Label htmlFor="roomTariff">Room Tariff (24hrs)</Label>
               <Input
-                value={`₹${formData.roomTariff}`}
-                disabled
-                className="bg-gray-50"
+                id="roomTariff"
+                type="number"
+                min="0"
+                value={formData.roomTariff}
+                onChange={(e) => setFormData(prev => ({ ...prev, roomTariff: parseInt(e.target.value) || 0 }))}
               />
             </div>
             
