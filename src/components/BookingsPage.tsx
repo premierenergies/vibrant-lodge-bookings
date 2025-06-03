@@ -55,15 +55,16 @@ const BookingsPage = () => {
   };
 
   const calculateTax = (baseAmount) => {
-    if (baseAmount <= 7500) {
+    const numericBaseAmount = Number(baseAmount);
+    if (numericBaseAmount <= 7500) {
       // 12% GST (6% CGST + 6% SGST)
-      const cgst = baseAmount * 0.06;
-      const sgst = baseAmount * 0.06;
+      const cgst = numericBaseAmount * 0.06;
+      const sgst = numericBaseAmount * 0.06;
       return { cgst, sgst, totalTax: cgst + sgst, taxRate: '12%' };
     } else {
       // 18% GST (9% CGST + 9% SGST)
-      const cgst = baseAmount * 0.09;
-      const sgst = baseAmount * 0.09;
+      const cgst = numericBaseAmount * 0.09;
+      const sgst = numericBaseAmount * 0.09;
       return { cgst, sgst, totalTax: cgst + sgst, taxRate: '18%' };
     }
   };
@@ -127,9 +128,9 @@ No. of Person: ${Number(booking.numberOfAdults) + Number(booking.numberOfChildre
 ARRIVAL                    DEPARTURE               ROOM No.    TYPE OF ROOM
 Date: ${checkInDate.toLocaleDateString()}    Date: ${checkOutDate.toLocaleDateString()}    ${booking.roomNumbers ? booking.roomNumbers.join(', ') : 'N/A'}    ${booking.roomType}
 Time: ${checkInDate.toLocaleTimeString()}    Time: ${checkOutDate.toLocaleTimeString()}    
-                                                            Rate per day: Rs. ${booking.roomTariff}    Ps.
+                                                            Rate per day: Rs. ${Number(booking.roomTariff)}    Ps.
 
-1. Room Rent for ${days} days                                                Rs. ${baseAmount}
+1. Room Rent for ${days} days                                                Rs. ${baseAmount.toFixed(2)}
 
 2. CGST @ ${taxInfo.taxRate === '12%' ? '6%' : '9%'}                                                                     Rs. ${taxInfo.cgst.toFixed(2)}
 
@@ -139,10 +140,10 @@ Time: ${checkInDate.toLocaleTimeString()}    Time: ${checkOutDate.toLocaleTimeSt
 
 Total GST (${taxInfo.taxRate}): Rs. ${taxInfo.totalTax.toFixed(2)}
 
-Rupees: ${numberToWords(totalWithGST)}                                 TOTAL: Rs. ${totalWithGST.toFixed(2)}
+Rupees: ${numberToWords(Math.round(totalWithGST))}                                 TOTAL: Rs. ${totalWithGST.toFixed(2)}
 
 Advance         Date              Amount      Less Advance
-Receipt No.     ${checkInDate.toLocaleDateString()}    Rs. ${booking.advancePayment}    Rs. ${booking.advancePayment}
+Receipt No.     ${checkInDate.toLocaleDateString()}    Rs. ${Number(booking.advancePayment).toFixed(2)}    Rs. ${Number(booking.advancePayment).toFixed(2)}
 
                                               Balance Received / Refunded: Rs. ${finalAmount.toFixed(2)}
 
@@ -167,7 +168,7 @@ THANK YOU                    HAPPY JOURNEY                      VISIT AGAIN
     const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
     const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
     
-    const numInt = Math.floor(num);
+    const numInt = Math.floor(Number(num));
     
     if (numInt === 0) return 'Zero';
     if (numInt < 10) return ones[numInt];
@@ -176,7 +177,7 @@ THANK YOU                    HAPPY JOURNEY                      VISIT AGAIN
     if (numInt < 1000) return ones[Math.floor(numInt / 100)] + ' Hundred' + (numInt % 100 !== 0 ? ' ' + numberToWords(numInt % 100) : '');
     if (numInt < 100000) return numberToWords(Math.floor(numInt / 1000)) + ' Thousand' + (numInt % 1000 !== 0 ? ' ' + numberToWords(numInt % 1000) : '');
     
-    return numInt.toString();
+    return String(numInt);
   };
 
   const activeBookings = bookings.filter(b => b.status !== 'checked-out');
@@ -253,7 +254,7 @@ THANK YOU                    HAPPY JOURNEY                      VISIT AGAIN
                       A:{booking.numberOfAdults} C:{booking.numberOfChildren}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      ₹{booking.totalAmount}
+                      ₹{Number(booking.totalAmount).toFixed(2)}
                     </td>
                   </tr>
                 ))}
