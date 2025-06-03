@@ -54,7 +54,30 @@ const BookingsPage = () => {
     setShowModal(false);
   };
 
+  const calculateTax = (baseAmount) => {
+    if (baseAmount <= 7500) {
+      // 12% GST (6% CGST + 6% SGST)
+      const cgst = baseAmount * 0.06;
+      const sgst = baseAmount * 0.06;
+      return { cgst, sgst, totalTax: cgst + sgst, taxRate: '12%' };
+    } else {
+      // 18% GST (9% CGST + 9% SGST)
+      const cgst = baseAmount * 0.09;
+      const sgst = baseAmount * 0.09;
+      return { cgst, sgst, totalTax: cgst + sgst, taxRate: '18%' };
+    }
+  };
+
   const handleCheckOut = (booking) => {
+    if (!booking || !booking.checkInDateTime) {
+      toast({
+        title: "Error",
+        description: "Invalid booking data",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const checkOutTime = new Date().toISOString();
     const updatedBooking = { ...booking, checkOutDateTime: checkOutTime, status: 'checked-out' };
     const newBookings = bookings.map(b => 
@@ -72,15 +95,19 @@ const BookingsPage = () => {
   };
 
   const generateReceipt = (booking) => {
+    if (!booking || !booking.checkInDateTime || !booking.checkOutDateTime) {
+      console.error('Invalid booking data for receipt generation');
+      return;
+    }
+
     const checkInDate = new Date(booking.checkInDateTime);
     const checkOutDate = new Date(booking.checkOutDateTime);
     const hours = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60);
     const days = Math.ceil(hours / 24);
     
     const baseAmount = Number(booking.roomTariff) * Number(booking.numberOfRooms) * days;
-    const cgst = baseAmount * 0.06;
-    const sgst = baseAmount * 0.06;
-    const totalWithGST = baseAmount + cgst + sgst;
+    const taxInfo = calculateTax(baseAmount);
+    const totalWithGST = baseAmount + taxInfo.totalTax;
     const finalAmount = totalWithGST - Number(booking.advancePayment);
 
     const receiptContent = `
@@ -98,19 +125,21 @@ Date: ${new Date().toLocaleDateString()}
 No. of Person: ${Number(booking.numberOfAdults) + Number(booking.numberOfChildren)}
 
 ARRIVAL                    DEPARTURE               ROOM No.    TYPE OF ROOM
-Date: ${checkInDate.toLocaleDateString()}    Date: ${checkOutDate.toLocaleDateString()}    ${booking.roomNumbers.join(', ')}    ${booking.roomType}
+Date: ${checkInDate.toLocaleDateString()}    Date: ${checkOutDate.toLocaleDateString()}    ${booking.roomNumbers ? booking.roomNumbers.join(', ') : 'N/A'}    ${booking.roomType}
 Time: ${checkInDate.toLocaleTimeString()}    Time: ${checkOutDate.toLocaleTimeString()}    
                                                             Rate per day: Rs. ${booking.roomTariff}    Ps.
 
 1. Room Rent for ${days} days                                                Rs. ${baseAmount}
 
-2. CGST                                                                      Rs. ${cgst.toFixed(2)}
+2. CGST @ ${taxInfo.taxRate === '12%' ? '6%' : '9%'}                                                                     Rs. ${taxInfo.cgst.toFixed(2)}
 
-3. SGST                                                                      Rs. ${sgst.toFixed(2)}
+3. SGST @ ${taxInfo.taxRate === '12%' ? '6%' : '9%'}                                                                     Rs. ${taxInfo.sgst.toFixed(2)}
 
 4. Miscellaneous / Sundries                                                 Rs. 0
 
-Rupees: ${this.numberToWords(totalWithGST)}                                 TOTAL: Rs. ${totalWithGST.toFixed(2)}
+Total GST (${taxInfo.taxRate}): Rs. ${taxInfo.totalTax.toFixed(2)}
+
+Rupees: ${numberToWords(totalWithGST)}                                 TOTAL: Rs. ${totalWithGST.toFixed(2)}
 
 Advance         Date              Amount      Less Advance
 Receipt No.     ${checkInDate.toLocaleDateString()}    Rs. ${booking.advancePayment}    Rs. ${booking.advancePayment}
@@ -134,19 +163,20 @@ THANK YOU                    HAPPY JOURNEY                      VISIT AGAIN
   };
 
   const numberToWords = (num) => {
-    // Simple number to words conversion - you can enhance this
     const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
     const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
     const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
     
-    if (num === 0) return 'Zero';
-    if (num < 10) return ones[num];
-    if (num < 20) return teens[num - 10];
-    if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
-    if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 !== 0 ? ' ' + this.numberToWords(num % 100) : '');
-    if (num < 100000) return this.numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 !== 0 ? ' ' + this.numberToWords(num % 1000) : '');
+    const numInt = Math.floor(num);
     
-    return num.toString(); // Fallback for larger numbers
+    if (numInt === 0) return 'Zero';
+    if (numInt < 10) return ones[numInt];
+    if (numInt < 20) return teens[numInt - 10];
+    if (numInt < 100) return tens[Math.floor(numInt / 10)] + (numInt % 10 !== 0 ? ' ' + ones[numInt % 10] : '');
+    if (numInt < 1000) return ones[Math.floor(numInt / 100)] + ' Hundred' + (numInt % 100 !== 0 ? ' ' + numberToWords(numInt % 100) : '');
+    if (numInt < 100000) return numberToWords(Math.floor(numInt / 1000)) + ' Thousand' + (numInt % 1000 !== 0 ? ' ' + numberToWords(numInt % 1000) : '');
+    
+    return numInt.toString();
   };
 
   const activeBookings = bookings.filter(b => b.status !== 'checked-out');
@@ -210,13 +240,13 @@ THANK YOU                    HAPPY JOURNEY                      VISIT AGAIN
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{booking.name}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{booking.phoneNumber}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(booking.checkInDateTime).toLocaleString()}
+                      {booking.checkInDateTime ? new Date(booking.checkInDateTime).toLocaleString() : 'N/A'}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(booking.checkOutDateTime).toLocaleString()}
+                      {booking.checkOutDateTime ? new Date(booking.checkOutDateTime).toLocaleString() : 'N/A'}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {booking.roomNumbers.join(', ')}
+                      {booking.roomNumbers ? booking.roomNumbers.join(', ') : 'N/A'}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{booking.roomType}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">

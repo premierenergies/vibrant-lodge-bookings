@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +37,20 @@ const BookingModal = ({ booking, onSave, onCheckOut, onClose }) => {
     'Non-AC': Array.from({length: 26}, (_, i) => 301 + i)
   };
 
+  const calculateTax = (baseAmount) => {
+    if (baseAmount <= 7500) {
+      // 12% GST (6% CGST + 6% SGST)
+      const cgst = baseAmount * 0.06;
+      const sgst = baseAmount * 0.06;
+      return { cgst, sgst, totalTax: cgst + sgst, taxRate: '12%' };
+    } else {
+      // 18% GST (9% CGST + 9% SGST)
+      const cgst = baseAmount * 0.09;
+      const sgst = baseAmount * 0.09;
+      return { cgst, sgst, totalTax: cgst + sgst, taxRate: '18%' };
+    }
+  };
+
   useEffect(() => {
     if (booking) {
       setFormData(booking);
@@ -61,9 +74,8 @@ const BookingModal = ({ booking, onSave, onCheckOut, onClose }) => {
     const hours = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60);
     const days = Math.ceil(hours / 24);
     const baseAmount = tariff * formData.numberOfRooms * Math.max(1, days);
-    const cgst = baseAmount * 0.06;
-    const sgst = baseAmount * 0.06;
-    const total = baseAmount + cgst + sgst;
+    const taxInfo = calculateTax(baseAmount);
+    const total = baseAmount + taxInfo.totalTax;
     
     setFormData(prev => ({
       ...prev,
@@ -88,7 +100,7 @@ const BookingModal = ({ booking, onSave, onCheckOut, onClose }) => {
     
     return roomData[formData.roomType].filter(room => 
       !bookedRooms.includes(room) || 
-      (booking && booking.roomNumbers.includes(room))
+      (booking && booking.roomNumbers && booking.roomNumbers.includes(room))
     );
   };
 
@@ -319,7 +331,7 @@ only producing this receipt                        GUEST SIGN.
             </div>
             
             <div>
-              <Label>Total Amount (incl. 12% GST)</Label>
+              <Label>Total Amount (incl. GST)</Label>
               <Input
                 value={`₹${formData.totalAmount.toFixed(2)}`}
                 disabled
