@@ -1,12 +1,50 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState, useEffect } from 'react';
+import Login from '../components/Login';
+import ReceptionistDashboard from '../components/ReceptionistDashboard';
+import AdminDashboard from '../components/AdminDashboard';
 
 const Index = () => {
+  const [user, setUser] = useState(null);
+  const [currentView, setCurrentView] = useState('bookings');
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('hotelUser');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+    localStorage.setItem('hotelUser', JSON.stringify(userData));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('hotelUser');
+    setCurrentView('bookings');
+  };
+
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {user.role === 'receptionist' ? (
+        <ReceptionistDashboard 
+          user={user} 
+          onLogout={handleLogout}
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+        />
+      ) : (
+        <AdminDashboard 
+          user={user} 
+          onLogout={handleLogout}
+        />
+      )}
     </div>
   );
 };
