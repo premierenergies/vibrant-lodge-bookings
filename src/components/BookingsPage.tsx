@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,7 +99,7 @@ Financial Details:
 - Room Tariff (24hrs): ₹${booking.roomTariff}
 - Total Amount: ₹${booking.totalAmount}
 - Advance Paid: ₹${booking.advancePayment}
-- Final Amount: ₹${booking.totalAmount - booking.advancePayment}
+- Final Amount: ₹${Number(booking.totalAmount) - Number(booking.advancePayment)}
 
 Thank you for staying with us!
 Generated on: ${new Date().toLocaleString()}
