@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,7 @@ import { toast } from "@/hooks/use-toast";
 
 const BookingModal = ({ booking, onSave, onCheckOut, onClose }) => {
   const [formData, setFormData] = useState({
-    bookingNumber: '',
+    bookingNumber: 0,
     name: '',
     address: '',
     phoneNumber: '',
@@ -59,7 +60,10 @@ const BookingModal = ({ booking, onSave, onCheckOut, onClose }) => {
     const checkOutDate = new Date(formData.checkOutDateTime);
     const hours = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60);
     const days = Math.ceil(hours / 24);
-    const total = tariff * formData.numberOfRooms * Math.max(1, days);
+    const baseAmount = tariff * formData.numberOfRooms * Math.max(1, days);
+    const cgst = baseAmount * 0.06;
+    const sgst = baseAmount * 0.06;
+    const total = baseAmount + cgst + sgst;
     
     setFormData(prev => ({
       ...prev,
@@ -114,31 +118,30 @@ HOTEL MANAGEMENT SYSTEM
 ADVANCE PAYMENT RECEIPT
 ========================
 
-Booking Number: ${bookingData.bookingNumber}
-Guest Name: ${bookingData.name}
-Address: ${bookingData.address}
-Phone: ${bookingData.phoneNumber}
+No. ${String(bookingData.bookingNumber).padStart(4, '0')}
+Date: ${new Date().toLocaleDateString()}
+Time: ${new Date().toLocaleTimeString()}
 
-Check-In: ${new Date(bookingData.checkInDateTime).toLocaleString()}
-Expected Check-Out: ${new Date(bookingData.checkOutDateTime).toLocaleString()}
+Received deposit towards Room Rent from
 
-Room Details:
-- Room Numbers: ${bookingData.roomNumbers.join(', ')}
-- Room Type: ${bookingData.roomType}
-- Number of Rooms: ${bookingData.numberOfRooms}
+Shri: ${bookingData.name}
 
-Guests:
-- Adults: ${bookingData.numberOfAdults}
-- Children: ${bookingData.numberOfChildren}
+Occupant of Room No: ${bookingData.roomNumbers.join(', ')}
 
-Financial Details:
-- Room Tariff (24hrs): ₹${bookingData.roomTariff}
-- Total Amount: ₹${bookingData.totalAmount}
-- Advance Paid: ₹${bookingData.advancePayment}
-- Remaining: ₹${bookingData.totalAmount - bookingData.advancePayment}
+Rent Charges Rs: ${bookingData.roomTariff} per Day
 
-Thank you for choosing us!
-Generated on: ${new Date().toLocaleString()}
+the sum of Rupees: ${bookingData.advancePayment} Only
+
+towards Advance
+
+For Hotel Management System
+                                                    CASHIER
+
+Rs. ${bookingData.advancePayment}
+
+The Guest's are requested to deposit and
+withdraw the amount in person
+only producing this receipt                        GUEST SIGN.
     `;
 
     const blob = new Blob([receiptContent], { type: 'text/plain' });
@@ -316,9 +319,9 @@ Generated on: ${new Date().toLocaleString()}
             </div>
             
             <div>
-              <Label>Total Amount</Label>
+              <Label>Total Amount (incl. 12% GST)</Label>
               <Input
-                value={`₹${formData.totalAmount}`}
+                value={`₹${formData.totalAmount.toFixed(2)}`}
                 disabled
                 className="bg-gray-50"
               />

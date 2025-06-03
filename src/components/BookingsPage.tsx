@@ -72,46 +72,81 @@ const BookingsPage = () => {
   };
 
   const generateReceipt = (booking) => {
+    const checkInDate = new Date(booking.checkInDateTime);
+    const checkOutDate = new Date(booking.checkOutDateTime);
+    const hours = (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60);
+    const days = Math.ceil(hours / 24);
+    
+    const baseAmount = Number(booking.roomTariff) * Number(booking.numberOfRooms) * days;
+    const cgst = baseAmount * 0.06;
+    const sgst = baseAmount * 0.06;
+    const totalWithGST = baseAmount + cgst + sgst;
+    const finalAmount = totalWithGST - Number(booking.advancePayment);
+
     const receiptContent = `
 HOTEL MANAGEMENT SYSTEM
 ========================
-FINAL PAYMENT RECEIPT
+FINAL PAYMENT RECEIPT - CASH BILL
 ========================
 
-Booking Number: ${booking.bookingNumber}
-Guest Name: ${booking.name}
-Address: ${booking.address}
-Phone: ${booking.phoneNumber}
+Bill No. ${String(booking.bookingNumber).padStart(4, '0')}
+GSTIN: 36AAHFH7018Q3ZS
 
-Check-In: ${new Date(booking.checkInDateTime).toLocaleString()}
-Check-Out: ${new Date(booking.checkOutDateTime).toLocaleString()}
+Name: ${booking.name}
+From: ${booking.address}
+Date: ${new Date().toLocaleDateString()}
+No. of Person: ${Number(booking.numberOfAdults) + Number(booking.numberOfChildren)}
 
-Room Details:
-- Room Numbers: ${booking.roomNumbers.join(', ')}
-- Room Type: ${booking.roomType}
-- Number of Rooms: ${booking.numberOfRooms}
+ARRIVAL                    DEPARTURE               ROOM No.    TYPE OF ROOM
+Date: ${checkInDate.toLocaleDateString()}    Date: ${checkOutDate.toLocaleDateString()}    ${booking.roomNumbers.join(', ')}    ${booking.roomType}
+Time: ${checkInDate.toLocaleTimeString()}    Time: ${checkOutDate.toLocaleTimeString()}    
+                                                            Rate per day: Rs. ${booking.roomTariff}    Ps.
 
-Guests:
-- Adults: ${booking.numberOfAdults}
-- Children: ${booking.numberOfChildren}
+1. Room Rent for ${days} days                                                Rs. ${baseAmount}
 
-Financial Details:
-- Room Tariff (24hrs): ₹${booking.roomTariff}
-- Total Amount: ₹${booking.totalAmount}
-- Advance Paid: ₹${booking.advancePayment}
-- Final Amount: ₹${Number(booking.totalAmount) - Number(booking.advancePayment)}
+2. CGST                                                                      Rs. ${cgst.toFixed(2)}
 
-Thank you for staying with us!
-Generated on: ${new Date().toLocaleString()}
+3. SGST                                                                      Rs. ${sgst.toFixed(2)}
+
+4. Miscellaneous / Sundries                                                 Rs. 0
+
+Rupees: ${this.numberToWords(totalWithGST)}                                 TOTAL: Rs. ${totalWithGST.toFixed(2)}
+
+Advance         Date              Amount      Less Advance
+Receipt No.     ${checkInDate.toLocaleDateString()}    Rs. ${booking.advancePayment}    Rs. ${booking.advancePayment}
+
+                                              Balance Received / Refunded: Rs. ${finalAmount.toFixed(2)}
+
+Check Out Time 24 Hours
+
+Regd. No.                    Guest Signature                    Receptionist
+
+THANK YOU                    HAPPY JOURNEY                      VISIT AGAIN
     `;
 
     const blob = new Blob([receiptContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Receipt_${booking.bookingNumber}_${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `Final_Receipt_${booking.bookingNumber}_${new Date().toISOString().split('T')[0]}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const numberToWords = (num) => {
+    // Simple number to words conversion - you can enhance this
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    
+    if (num === 0) return 'Zero';
+    if (num < 10) return ones[num];
+    if (num < 20) return teens[num - 10];
+    if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
+    if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 !== 0 ? ' ' + this.numberToWords(num % 100) : '');
+    if (num < 100000) return this.numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 !== 0 ? ' ' + this.numberToWords(num % 1000) : '');
+    
+    return num.toString(); // Fallback for larger numbers
   };
 
   const activeBookings = bookings.filter(b => b.status !== 'checked-out');
