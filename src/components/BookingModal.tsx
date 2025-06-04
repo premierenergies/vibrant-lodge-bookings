@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -408,12 +407,9 @@ const BookingModal = ({ booking, onSave, onCheckOut, onClose }) => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Double">Double</SelectItem>
-                  <SelectItem value="Triple">Triple</SelectItem>
-                  <SelectItem value="Quadruple">Quadruple</SelectItem>
-                  <SelectItem value="DR">DR</SelectItem>
-                  <SelectItem value="TR">TR</SelectItem>
-                  <SelectItem value="QR">QR</SelectItem>
+                  <SelectItem value="DR">DR (Double Room)</SelectItem>
+                  <SelectItem value="TR">TR (Triple Room)</SelectItem>
+                  <SelectItem value="QR">QR (Quadruple Room)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
