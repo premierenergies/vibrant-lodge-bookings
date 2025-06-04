@@ -158,7 +158,7 @@ const BookingsPage = () => {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{booking.roomCategory || 'N/A'}</td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        A:{booking.numberOfAdults || 0} C:{booking.numberOfChildren || 0}
+                        A:{Number(booking.numberOfAdults) || 0} C:{Number(booking.numberOfChildren) || 0}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         ₹{Number(booking.totalAmount || 0).toFixed(2)}

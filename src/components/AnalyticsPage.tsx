@@ -334,8 +334,8 @@ const AnalyticsPage = () => {
               <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
                 <span className="font-medium">Most Popular Room Type</span>
                 <span className="text-green-600 font-bold">
-                  {roomTypePieData.length > 0 ? 
-                    roomTypePieData.reduce((max, type) => type.count > max.count ? type : max).name : 'N/A'}
+                  {roomCategoryPieData.length > 0 ? 
+                    roomCategoryPieData.reduce((max, type) => type.count > max.count ? type : max).name : 'N/A'}
                 </span>
               </div>
               <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
