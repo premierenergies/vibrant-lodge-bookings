@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -69,17 +70,24 @@ const AnalyticsPage = () => {
       return sum + ((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
     }, 0) / totalBookings : 0;
 
-  // Room Type Analytics
-  const roomTypeData = filteredBookings.reduce((acc, booking) => {
-    const type = booking.roomType || 'Unknown';
-    acc[type] = (acc[type] || 0) + (Number(booking.totalAmount) || 0);
+  // Room Category Analytics with SR calculation
+  const getRoomCategory = (booking) => {
+    if (booking.numberOfAdults === 1 && (booking.roomCategory === 'DR' || booking.roomCategory === 'TR' || booking.roomCategory === 'QR')) {
+      return 'SR';
+    }
+    return booking.roomCategory || 'Unknown';
+  };
+
+  const roomCategoryData = filteredBookings.reduce((acc, booking) => {
+    const category = getRoomCategory(booking);
+    acc[category] = (acc[category] || 0) + (Number(booking.totalAmount) || 0);
     return acc;
   }, {});
 
-  const roomTypePieData = Object.entries(roomTypeData).map(([type, revenue]) => ({
-    name: type,
+  const roomCategoryPieData = Object.entries(roomCategoryData).map(([category, revenue]) => ({
+    name: category,
     value: revenue,
-    count: filteredBookings.filter(b => b.roomType === type).length
+    count: filteredBookings.filter(b => getRoomCategory(b) === category).length
   }));
 
   // Booking Type Analytics
@@ -233,16 +241,16 @@ const AnalyticsPage = () => {
           </CardContent>
         </Card>
 
-        {/* Room Type Revenue */}
+        {/* Room Category Revenue with SR */}
         <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Revenue by Room Type</CardTitle>
+            <CardTitle>Revenue by Room Category (SR/DR/TR/QR)</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={roomTypePieData}
+                  data={roomCategoryPieData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -251,7 +259,7 @@ const AnalyticsPage = () => {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {roomTypePieData.map((entry, index) => (
+                  {roomCategoryPieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
